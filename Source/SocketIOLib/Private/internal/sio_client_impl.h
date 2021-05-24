@@ -82,6 +82,8 @@
 #endif
 
         struct client_impl_base {
+
+        public:
             enum con_state
             {
                 con_opening,
@@ -95,34 +97,38 @@
             virtual ~client_impl_base() {}
 
             // listeners and event bindings. (see SYNTHESIS_SETTER below)
-            virtual void set_open_listener(client::con_listener const&) = 0;
-            virtual void set_fail_listener(client::con_listener const&) = 0;
-            virtual void set_reconnect_listener(client::reconnect_listener const&) = 0;
-            virtual void set_reconnecting_listener(client::con_listener const&) = 0;
-            virtual void set_close_listener(client::close_listener const&) = 0;
-            virtual void set_socket_open_listener(client::socket_listener const&) = 0;
-            virtual void set_socket_close_listener(client::socket_listener const&) = 0;
+            virtual void set_open_listener(client::con_listener const&) {};// = 0;
+            virtual void set_fail_listener(client::con_listener const&) {};
+            virtual void set_reconnect_listener(client::reconnect_listener const&) {};
+            virtual void set_reconnecting_listener(client::con_listener const&) {};
+            virtual void set_close_listener(client::close_listener const&) {};
+            virtual void set_socket_open_listener(client::socket_listener const&) {};
+            virtual void set_socket_close_listener(client::socket_listener const&) {};
 
             // used by sio::client
-            virtual void clear_con_listeners() = 0;
-            virtual void clear_socket_listeners() = 0;
-            virtual void connect(const string& uri, const map<string, string>& query, const map<string, string>& headers, const std::string& path = "socket.io") = 0;
+            virtual void clear_con_listeners() {};
+            virtual void clear_socket_listeners() {};
+            virtual void connect(const string& uri, const map<string, string>& query, const map<string, string>& headers, const std::string& path = "socket.io") {};
 
             virtual sio::socket::ptr const& socket(const std::string& nsp) = 0;
-            virtual void close() = 0;
-            virtual void sync_close() = 0;
-            virtual bool opened() const = 0;
+            virtual void close() {};
+            virtual void sync_close() {};
+            virtual bool opened() const { return false; };
             virtual std::string const& get_sessionid() const = 0;
-            virtual void set_reconnect_attempts(unsigned attempts) = 0;
-            virtual void set_reconnect_delay(unsigned millis) = 0;
-            virtual void set_reconnect_delay_max(unsigned millis) = 0;
+            virtual void set_reconnect_attempts(unsigned attempts) {};
+            virtual void set_reconnect_delay(unsigned millis) {};
+            virtual void set_reconnect_delay_max(unsigned millis) {};
 
             // used by sio::socket
-            virtual void send(packet& p) = 0;
-            virtual void remove_socket(std::string const& nsp) = 0;
+            virtual void send(packet& p) {};
+            virtual void remove_socket(std::string const& nsp) {};
             virtual asio::io_service& get_io_service() = 0;
-            virtual void on_socket_closed(std::string const& nsp) = 0;
-            virtual void on_socket_opened(std::string const& nsp) = 0;
+            virtual void on_socket_closed(std::string const& nsp) {};
+            virtual void on_socket_opened(std::string const& nsp) {};
+
+            virtual void set_logs_default() {};
+            virtual void set_logs_quiet() {};
+            virtual void set_logs_verbose() {};
 
             virtual void set_logs_default() = 0;
             virtual void set_logs_quiet() = 0;
@@ -241,11 +247,11 @@
         // Connection pointer for client functions.
         connection_hdl m_con;
         client_type m_client;
+
         // Socket.IO server settings
         std::string m_sid;
         std::string m_base_url;
         std::string m_query_string;
-        std::string m_path;
         std::map<std::string, std::string> m_http_headers;
 
         unsigned int m_ping_interval;
@@ -281,6 +287,9 @@
         unsigned m_reconn_attempts;
 
         unsigned m_reconn_made;
+
+        //passthrough path of plugin
+        std::string m_path;
 
         friend class sio::client;
         friend class sio::socket;
