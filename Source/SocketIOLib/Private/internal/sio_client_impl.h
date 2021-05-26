@@ -3,6 +3,10 @@
 #ifndef SIO_CLIENT_IMPL_H
 #define SIO_CLIENT_IMPL_H
 
+#ifndef SIO_TLS
+#define SIO_TLS 0
+#endif
+
 /* This disables two things:
    1) error 4503 where MSVC complains about
 	  decorated names being too long. There's no way around
