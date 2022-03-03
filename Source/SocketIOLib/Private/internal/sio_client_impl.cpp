@@ -77,10 +77,6 @@ namespace sio
         m_client.set_close_handler(std::bind(&client_impl<client_type>::on_close, this, _1));
         m_client.set_fail_handler(std::bind(&client_impl<client_type>::on_fail, this, _1));
         m_client.set_message_handler(std::bind(&client_impl<client_type>::on_message, this, _1, _2));
-/* duplicate if we're using template_init
-#if SIO_TLS
-        m_client.set_tls_init_handler(std::bind(&client_impl<client_type>::on_tls_init, this, _1));
-#endif*/
         m_packet_mgr.set_decode_callback(std::bind(&client_impl<client_type>::on_decode, this, _1));
         m_packet_mgr.set_encode_callback(std::bind(&client_impl<client_type>::on_encode, this, _1, _2));
         template_init();
