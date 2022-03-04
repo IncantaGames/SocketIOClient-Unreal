@@ -36,18 +36,31 @@ namespace sio
     {
     }
 
-    client::client(const std::string& uri)
+    client::client(const bool bShouldUseTlsLibraries, const bool bShouldSkipCertificateVerification)
     {
-        if (!client_impl_base::is_tls(uri))
+        if (bShouldUseTlsLibraries)
         {
-            m_impl = new client_impl<client_type_no_tls>(uri);
-        }
 #if SIO_TLS
+            m_impl = new client_impl<client_type_tls>();
+
+            if (bShouldSkipCertificateVerification)
+            {
+                m_impl->set_verify_mode(asio::ssl::verify_none);
+            }
+            else
+            {
+                m_impl->set_verify_mode(asio::ssl::verify_peer);
+                // TODO: add verify CA chain file
+            }
+            m_impl->template_init(); // reinitialize based on the new mode
+#else
+            m_impl = new client_impl<client_type_no_tls>();
+#endif
+        }
         else
         {
-            m_impl = new client_impl<client_type_tls>(uri);
+            m_impl = new client_impl<client_type_no_tls>();
         }
-#endif
     }
     
     client::~client()

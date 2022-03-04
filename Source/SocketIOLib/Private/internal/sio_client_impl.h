@@ -85,7 +85,7 @@
         typedef websocketpp::client<client_config_tls> client_type_tls;
 #endif
 
-        struct client_impl_base {
+        class client_impl_base {
 
         public:
             enum con_state
@@ -97,6 +97,7 @@
             };
 
             client_impl_base() {}
+            virtual void template_init() {};
 
             virtual ~client_impl_base() {}
 
@@ -134,14 +135,14 @@
             virtual void set_logs_quiet() {};
             virtual void set_logs_verbose() {};
 
-            virtual void set_logs_default() = 0;
-            virtual void set_logs_quiet() = 0;
-            virtual void set_logs_verbose() = 0;
-
             virtual std::string const& get_current_url() const = 0;
 
             // used for selecting whether or not to use TLS
             static bool is_tls(const std::string& uri);
+
+#if SIO_TLS
+            virtual void set_verify_mode(int mode) {};
+#endif
 
         protected:
             // Wrap protected member functions of sio::socket because only client_impl_base is friended.
@@ -158,8 +159,8 @@
     public:
         typedef typename client_type::message_ptr message_ptr;
 
-        client_impl(const std::string& uri = std::string());
-        void template_init(); // template-specific initialization
+        client_impl();
+        void template_init() override; // template-specific initialization
 
         ~client_impl();
 
@@ -191,6 +192,10 @@
         void set_logs_quiet();
 
         void set_logs_verbose();
+
+#if SIO_TLS
+        void set_verify_mode(int mode) override;
+#endif
 
     public:
         void send(packet& p);
@@ -294,6 +299,10 @@
 
         //passthrough path of plugin
         std::string m_path;
+
+#if SIO_TLS
+        int verify_mode = -1;
+#endif
 
         friend class sio::client;
         friend class sio::socket;

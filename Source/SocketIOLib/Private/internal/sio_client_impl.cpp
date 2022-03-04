@@ -49,8 +49,7 @@ namespace sio
 {
     /*************************public:*************************/
     template<typename client_type>
-    client_impl<client_type>::client_impl(const string& uri) :
-        m_base_url(uri),
+    client_impl<client_type>::client_impl() :
         m_ping_interval(0),
         m_ping_timeout(0),
         m_network_thread(),
@@ -674,7 +673,7 @@ namespace sio
 
 #if SIO_TLS
     typedef websocketpp::lib::shared_ptr<asio::ssl::context> context_ptr;
-    static context_ptr on_tls_init(connection_hdl conn)
+    static context_ptr on_tls_init(int verify_mode, connection_hdl conn)
     {
         context_ptr ctx = context_ptr(new  asio::ssl::context(asio::ssl::context::tlsv12));
         asio::error_code ec;
@@ -686,15 +685,24 @@ namespace sio
             cerr << "Init tls failed,reason:" << ec.message() << endl;
         }
 
-        ctx->set_verify_mode(asio::ssl::verify_none);
+        if (verify_mode >= 0)
+        {
+            ctx->set_verify_mode(verify_mode);
+        }
 
         return ctx;
+    }
+
+    template<typename client_type>
+    void client_impl<client_type>::set_verify_mode(int mode)
+    {
+        verify_mode = mode;
     }
 
     template<>
     void client_impl<client_type_tls>::template_init()
     {
-        m_client.set_tls_init_handler(&on_tls_init);
+        m_client.set_tls_init_handler(std::bind(&on_tls_init, verify_mode, std::placeholders::_1));
     }
 #endif
 
@@ -705,12 +713,14 @@ namespace sio
         {
             return false;
         }
-#if SIO_TLS
         else if (uo.get_scheme() == "https" || uo.get_scheme() == "wss")
         {
+#if SIO_TLS
             return true;
-        }
+#else
+            return false;
 #endif
+        }
         else
         {
             throw std::runtime_error("unsupported URI scheme");

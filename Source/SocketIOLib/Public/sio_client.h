@@ -34,7 +34,7 @@ namespace sio
         
         client();
 
-        client(const std::string& uri);
+        client(const bool bShouldUseTlsLibraries, const bool bShouldSkipCertificateVerification);
 
         ~client();
         
