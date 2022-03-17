@@ -193,6 +193,25 @@
 
         void set_logs_verbose();
 
+#define SYNTHESIS_SETTER(__TYPE__,__FIELD__) \
+        void set_##__FIELD__(__TYPE__ const& l) \
+            { m_##__FIELD__ = l;}
+
+            SYNTHESIS_SETTER(client::con_listener, open_listener)
+
+            SYNTHESIS_SETTER(client::con_listener, fail_listener)
+
+            SYNTHESIS_SETTER(client::reconnect_listener, reconnect_listener)
+
+            SYNTHESIS_SETTER(client::con_listener, reconnecting_listener)
+
+            SYNTHESIS_SETTER(client::close_listener, close_listener)
+
+            SYNTHESIS_SETTER(client::socket_listener, socket_open_listener)
+
+            SYNTHESIS_SETTER(client::socket_listener, socket_close_listener)
+#undef SYNTHESIS_SETTER
+
 #if SIO_TLS
         void set_verify_mode(int mode) override;
 #endif
